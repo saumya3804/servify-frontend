@@ -18,10 +18,10 @@ const Cart = () => {
   const [couponCode, setCouponCode] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("Pending");
   
-  // Stores the applied discount details. If null, no coupon is applied.
+  // Stores Coupon
   const [appliedDiscount, setAppliedDiscount] = useState(null);
 
-  // 1. Calculate Base Totals
+  // Calculate Base Totals
   let totalPrice = 0;
   cart.forEach((service) => {
     totalPrice += service.price * service.quantity;
@@ -29,13 +29,12 @@ const Cart = () => {
   const formattedTotalPrice = totalPrice.toFixed(2);
   const originalPriceWithGST = (formattedTotalPrice * 1.18).toFixed(2);
 
-  // 2. Determine Final Payable Amount
-  // If a discount is applied, use that. Otherwise, use the original price.
+  // Final Payable Amount
+  // If a discount is applied,It will show discounted price
   const finalPayableAmount = appliedDiscount 
     ? appliedDiscount.new_total_price 
     : originalPriceWithGST;
 
-  // 3. Fetch Coupons on Component Mount
   useEffect(() => {
     const fetchCoupons = async () => {
       try {
@@ -54,9 +53,7 @@ const Cart = () => {
     setCouponCode("");
   };
 
-  // 4. Apply Coupon Logic
   const applyCouponCode = async (codeToApply) => {
-    // Use the code passed as arg, or the state value
     const code = codeToApply || couponCode;
 
     if (!code) {
@@ -67,36 +64,35 @@ const Cart = () => {
     try {
       const response = await axiosInstance.post("https://servify-backend-bvwf.onrender.com/apply-coupon/", {
         code: code,
-        totalPriceWithGST: originalPriceWithGST, // Always send the ORIGINAL price to calculate discount
+        totalPriceWithGST: originalPriceWithGST, 
       });
 
-      // Update state with the discount details from backend
+   
       setAppliedDiscount(response.data);
-      setCouponCode(code); // Ensure input matches applied code
+      setCouponCode(code); 
       toast.success(`Coupon ${code} Applied! You saved ₹${response.data.discount_amount}`);
     
     } catch (error) {
-      setAppliedDiscount(null); // Reset if invalid
+      setAppliedDiscount(null);
       const msg = error.response?.data?.error || "Coupon could not be applied";
       toast.error(msg);
     }
   };
 
-  // 5. Remove Coupon Logic
+  //Removing coupon if user cancels
   const removeCoupon = () => {
     setAppliedDiscount(null);
     setCouponCode("");
     toast.success("Coupon removed");
   };
 
-  // 6. Payment Logic (Uses finalPayableAmount)
+  // Payment Logic
   const handlePayment = async () => {
     try {
-      // Create Razorpay order with the FINAL (Discounted) amount
       const response = await axiosInstance.post(
         "https://servify-backend-bvwf.onrender.com/payment/",
         {
-          totalPriceWithGST: finalPayableAmount, // Sends 450 instead of 500 if discounted
+          totalPriceWithGST: finalPayableAmount,
         }
       );
 
@@ -109,7 +105,7 @@ const Cart = () => {
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY,
-        amount: finalPayableAmount * 100, // Amount in paise
+        amount: finalPayableAmount * 100, 
         currency: "INR",
         name: "Servify",
         description: appliedDiscount ? `Order with ${appliedDiscount.code}` : "Transaction",
@@ -219,15 +215,15 @@ const Cart = () => {
                 </div>
               ))}
               
-              {/* --- Price Breakdown --- */}
+             
               <div className="flex flex-col border-b pb-2">
-                 {/* Subtotal */}
+          
                 <div className="w-full flex justify-end gap-x-10 items-center">
                   <span className="text-lg text-gray-600">Subtotal:</span>
                   <span className="text-lg font-semibold text-gray-800">₹{formattedTotalPrice}</span>
                 </div>
                 
-                {/* GST */}
+             
                 <div className="w-full flex justify-end gap-x-10 items-center">
                   <span className="text-md text-gray-500">GST (18%):</span>
                   <span className="text-md font-semibold text-gray-500">
@@ -235,7 +231,6 @@ const Cart = () => {
                   </span>
                 </div>
 
-                {/* Discount Row (Only visible if coupon applied) */}
                 {appliedDiscount && (
                   <div className="w-full flex justify-end gap-x-10 items-center text-green-600 mt-1">
                     <span className="text-lg font-medium">
@@ -248,12 +243,11 @@ const Cart = () => {
                 )}
               </div>
 
-              {/* --- Coupon Input Section --- */}
+            
               <div className="flex items-center gap-x-3 pt-2">
                 <span className="text-lg font-medium text-gray-700">Coupon Code:</span>
                 
                 {appliedDiscount ? (
-                  // State: Coupon Applied
                   <div className="flex items-center gap-4 w-full">
                     <span className="px-4 py-2 bg-green-100 text-green-700 font-bold rounded border border-green-300">
                       {appliedDiscount.code} Applied ✓
@@ -266,7 +260,6 @@ const Cart = () => {
                     </button>
                   </div>
                 ) : (
-                  // State: No Coupon Applied
                   <>
                     <input
                       type="text"
@@ -294,7 +287,6 @@ const Cart = () => {
               </div>
             </div>
 
-            {/* --- Final Total Section --- */}
             <div className="flex justify-between items-center mt-6 pt-4 border-t">
               <span className="text-xl font-bold text-gray-800">
                 Total Payable:
@@ -346,7 +338,6 @@ const Cart = () => {
           {paymentStatus === "Paid" && (
             <div className="flex items-center bg-green-100 border-l-4 border-green-500 text-green-700 p-4 max-w-md h-[150px] rounded-md my-5">
               <div className="flex">
-                 {/* Success Icon */}
                  <div className="py-1">
                   <svg className="h-6 w-6 text-green-500 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
