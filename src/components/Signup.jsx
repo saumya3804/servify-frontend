@@ -107,7 +107,7 @@ const Signup = ({ isEmployee }) => {
 
     await axiosInstance
       .post(
-        `http://localhost:8000/signup/${!isEmployee ? "user" : "employee"}/`,
+        `https://servify-backend-bvwf.onrender.com/signup/${!isEmployee ? "user" : "employee"}/`,
         formData
       )
       .then(async (response) => {
@@ -116,7 +116,7 @@ const Signup = ({ isEmployee }) => {
         // dispatch(addUser(response.data.is_employee));
         // console.log(formData.get("email"))
         await axiosUnauthenticatedInstance
-          .post("http://localhost:8000/login/", {
+          .post("https://servify-backend-bvwf.onrender.com/login/", {
             email: formData.email,
             password: formData.password,
           })

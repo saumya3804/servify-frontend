@@ -27,7 +27,6 @@ const Cart = () => {
     totalPrice += service.price * service.quantity;
   });
   const formattedTotalPrice = totalPrice.toFixed(2);
-  // Original Price with GST (String)
   const originalPriceWithGST = (formattedTotalPrice * 1.18).toFixed(2);
 
   // 2. Determine Final Payable Amount
@@ -40,7 +39,7 @@ const Cart = () => {
   useEffect(() => {
     const fetchCoupons = async () => {
       try {
-        const res = await axiosInstance.get("http://localhost:8000/coupons/");
+        const res = await axiosInstance.get("https://servify-backend-bvwf.onrender.com/coupons/");
         setAvailableCoupons(res.data);
       } catch (error) {
         console.error("Error fetching coupons:", error);
@@ -66,7 +65,7 @@ const Cart = () => {
     }
 
     try {
-      const response = await axiosInstance.post("http://localhost:8000/apply-coupon/", {
+      const response = await axiosInstance.post("https://servify-backend-bvwf.onrender.com/apply-coupon/", {
         code: code,
         totalPriceWithGST: originalPriceWithGST, // Always send the ORIGINAL price to calculate discount
       });
@@ -95,7 +94,7 @@ const Cart = () => {
     try {
       // Create Razorpay order with the FINAL (Discounted) amount
       const response = await axiosInstance.post(
-        "http://localhost:8000/payment/",
+        "https://servify-backend-bvwf.onrender.com/payment/",
         {
           totalPriceWithGST: finalPayableAmount, // Sends 450 instead of 500 if discounted
         }
@@ -135,7 +134,7 @@ const Cart = () => {
   const verifyPayment = async (razorpay_payment_id, razorpay_order_id, razorpay_signature) => {
     try {
       const response = await axiosInstance.post(
-        "http://localhost:8000/verifypayment/",
+        "https://servify-backend-bvwf.onrender.com/verifypayment/",
         {
           razorpay_payment_id,
           razorpay_order_id,
@@ -155,7 +154,7 @@ const Cart = () => {
 
   const placeOrder = async () => {
     try {
-      await axiosInstance.post("http://localhost:8000/place-order/", {
+      await axiosInstance.post("https://servify-backend-bvwf.onrender.com/place-order/", {
         services: orderPlaceServices,
       });
       setPaymentStatus("Paid");
